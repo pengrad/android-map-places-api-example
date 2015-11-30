@@ -11,7 +11,6 @@ import io.github.axxiss.places.PlacesSettings;
 import io.github.axxiss.places.Response;
 import io.github.axxiss.places.callback.PlacesCallback;
 import io.github.axxiss.places.enums.Params;
-import io.github.axxiss.places.enums.PlaceType;
 import io.github.axxiss.places.enums.Request;
 import io.github.axxiss.places.model.Place;
 import io.github.axxiss.places.request.PlaceParams;
@@ -25,19 +24,19 @@ import rx.Subscriber;
  */
 public class GooglePlaceAdapter {
 
+    private String nextPageToken;
+
     public GooglePlaceAdapter(Context context) {
         PlacesSettings.getInstance().setApiKey(context.getString(R.string.google_places_key));
     }
 
-    private String nextPageToken;
-
-    public Observable<Place[]> getPlacesByType(LatLng latLng, int radius, @Nullable PlaceType placeType) {
+    public Observable<Place[]> getPlacesByType(LatLng latLng, int radius, @Nullable String placeType) {
         return Observable.create(subscriber -> {
             PlaceParams params = new PlaceParams();
             params.put(Params.Location, PlaceParams.buildLocation(latLng.latitude, latLng.longitude));
             params.put(Params.Radius, radius);
-            if (placeType != null) {
-                params.setTypes(new PlaceType[]{placeType});
+            if (!TextUtils.isEmpty(placeType)) {
+                params.put(Params.Types, placeType);
             }
             executeRequest(subscriber, params);
         });

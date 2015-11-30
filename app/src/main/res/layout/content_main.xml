@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     android:paddingBottom="@dimen/activity_vertical_margin"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
@@ -13,4 +14,248 @@
     tools:context=".MainActivity"
     tools:showIn="@layout/app_bar_main">
 
-</RelativeLayout>
+
+    <GridLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="48dp"
+        android:columnCount="3">
+
+
+        <LinearLayout
+            android:id="@+id/cat_restaurant"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_main_item"
+            android:clickable="true"
+            android:gravity="center"
+            android:onClick="onCategorySelect"
+            android:orientation="vertical">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="16dp"
+                android:src="@drawable/ic_cat_1"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="marquee"
+                android:gravity="center"
+                android:singleLine="true"
+                android:text="Restaurant"
+                android:textColor="@color/primary_text"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/cat_cafe"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_main_item"
+            android:clickable="true"
+            android:gravity="center"
+            android:onClick="onCategorySelect"
+            android:orientation="vertical">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="16dp"
+                android:src="@drawable/ic_cat_5"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="marquee"
+                android:gravity="center"
+                android:singleLine="true"
+                android:text="Cafe"
+                android:textColor="@color/primary_text"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/cat_food"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_main_item"
+            android:clickable="true"
+            android:gravity="center"
+            android:onClick="onCategorySelect"
+            android:orientation="vertical">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="16dp"
+                android:src="@drawable/ic_cat_3"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="marquee"
+                android:gravity="center"
+                android:singleLine="true"
+                android:text="Restaurant"
+                android:textColor="@color/primary_text"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/cat_atm"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_main_item"
+            android:clickable="true"
+            android:gravity="center"
+            android:onClick="onCategorySelect"
+            android:orientation="vertical">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="16dp"
+                android:src="@drawable/ic_cat_20"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="marquee"
+                android:gravity="center"
+                android:singleLine="true"
+                android:text="ATM"
+                android:textColor="@color/primary_text"/>
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/cat_petrol"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_main_item"
+            android:clickable="true"
+            android:gravity="center"
+            android:onClick="onCategorySelect"
+            android:orientation="vertical">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="16dp"
+                android:src="@drawable/ic_cat_21"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="marquee"
+                android:gravity="center"
+                android:singleLine="true"
+                android:text="Petrol"
+                android:textColor="@color/primary_text"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/cat_health"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_main_item"
+            android:clickable="true"
+            android:gravity="center"
+            android:onClick="onCategorySelect"
+            android:orientation="vertical">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="16dp"
+                android:src="@drawable/ic_cat_14"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="marquee"
+                android:gravity="center"
+                android:singleLine="true"
+                android:text="Health"
+                android:textColor="@color/primary_text"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/cat_bus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_main_item"
+            android:clickable="true"
+            android:gravity="center"
+            android:onClick="onCategorySelect"
+            android:orientation="vertical">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="16dp"
+                android:src="@drawable/ic_cat_7"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="marquee"
+                android:gravity="center"
+                android:singleLine="true"
+                android:text="Bus"
+                android:textColor="@color/primary_text"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/cat_spa"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_main_item"
+            android:clickable="true"
+            android:gravity="center"
+            android:onClick="onCategorySelect"
+            android:orientation="vertical">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="16dp"
+                android:src="@drawable/ic_cat_15"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="marquee"
+                android:gravity="center"
+                android:singleLine="true"
+                android:text="SPA"
+                android:textColor="@color/primary_text"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/cat_shopping"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_main_item"
+            android:clickable="true"
+            android:gravity="center"
+            android:onClick="onCategorySelect"
+            android:orientation="vertical">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="16dp"
+                android:src="@drawable/ic_cat_4"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="marquee"
+                android:gravity="center"
+                android:singleLine="true"
+                android:text="Shopping"
+                android:textColor="@color/primary_text"/>
+        </LinearLayout>
+    </GridLayout>
+
+
+</LinearLayout>

@@ -11,6 +11,7 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -40,6 +41,7 @@ import java.util.List;
 
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import io.github.axxiss.places.model.Photo;
 import io.github.axxiss.places.model.Place;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
@@ -47,6 +49,8 @@ import rx.schedulers.Schedulers;
 
 
 public class MapActivity extends RxAppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMyLocationChangeListener, GoogleMap.OnMarkerClickListener {
+
+    public static final String EXTRA_TYPE = "TYPE";
 
     public static final int DEFAULT_RADIUS = 1000;
     public static LatLng HANOI_LOCATION = new LatLng(21.0274259, 105.8222217);
@@ -57,7 +61,9 @@ public class MapActivity extends RxAppCompatActivity implements OnMapReadyCallba
     private RecyclerViewListAdapter<Place> adapter;
     private Location mLocation;
 
+
     private GooglePlaceAdapter googlePlaceAdapter;
+    private String mPlaceType;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,11 +72,14 @@ public class MapActivity extends RxAppCompatActivity implements OnMapReadyCallba
 
         ButterKnife.bind(this);
 
-        googlePlaceAdapter = new GooglePlaceAdapter(this);
-
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        mPlaceType = getIntent().getStringExtra(EXTRA_TYPE);
+        googlePlaceAdapter = new GooglePlaceAdapter(this);
+
+        if (!TextUtils.isEmpty(mPlaceType)) setTitle(mPlaceType);
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
@@ -87,6 +96,14 @@ public class MapActivity extends RxAppCompatActivity implements OnMapReadyCallba
                     public void onBindItem(Place item) {
                         TextView textView = (TextView) itemView.findViewById(R.id.place_title);
                         textView.setText(item.getName());
+
+                        ImageView imageView = (ImageView) itemView.findViewById(R.id.place_image);
+                        List<Photo> photos = item.getPhotos();
+                        if (photos != null && !photos.isEmpty()) {
+                            ImageUtils.loadImage(itemView.getContext(), imageView, photos.get(0).getPhoto_reference());
+                        } else {
+                            Glide.with(imageView.getContext()).load(item.getIcon()).centerCrop().into(imageView);
+                        }
                     }
                 };
             }
@@ -216,7 +233,7 @@ public class MapActivity extends RxAppCompatActivity implements OnMapReadyCallba
     }
 
     private void searchPlaces(LatLng latLng) {
-        execute(googlePlaceAdapter.getAllPlaces(latLng, DEFAULT_RADIUS));
+        execute(googlePlaceAdapter.getPlacesByType(latLng, DEFAULT_RADIUS, mPlaceType));
     }
 
     private void execute(Observable<Place[]> observable) {
