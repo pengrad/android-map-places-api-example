@@ -8,10 +8,8 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -25,8 +23,6 @@ import com.androidmapsextensions.SupportMapFragment;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
-import com.github.pengrad.recyclerview.RecyclerViewHolder;
-import com.github.pengrad.recyclerview.RecyclerViewListAdapter;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.BitmapDescriptor;
@@ -41,7 +37,6 @@ import java.util.List;
 
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import io.github.axxiss.places.model.Photo;
 import io.github.axxiss.places.model.Place;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
@@ -58,7 +53,7 @@ public class MapActivity extends RxAppCompatActivity implements OnMapReadyCallba
 
     private GoogleMap mMap;
 
-    private RecyclerViewListAdapter<Place> adapter;
+    private MyRecyclerViewAdapter adapter;
     private Location mLocation;
 
 
@@ -85,29 +80,7 @@ public class MapActivity extends RxAppCompatActivity implements OnMapReadyCallba
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getExtendedMapAsync(this);
 
-        adapter = new RecyclerViewListAdapter<Place>((item, view, adapterPosition) -> {
-            Toast.makeText(this, item.getName(), Toast.LENGTH_SHORT).show();
-        }) {
-            @Override
-            public RecyclerViewHolder<Place> onCreateViewHolder(ViewGroup parent, int viewType) {
-                View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.place_list_item, parent, false);
-                return new RecyclerViewHolder<Place>(view) {
-                    @Override
-                    public void onBindItem(Place item) {
-                        TextView textView = (TextView) itemView.findViewById(R.id.place_title);
-                        textView.setText(item.getName());
-
-                        ImageView imageView = (ImageView) itemView.findViewById(R.id.place_image);
-                        List<Photo> photos = item.getPhotos();
-                        if (photos != null && !photos.isEmpty()) {
-                            ImageUtils.loadImage(itemView.getContext(), imageView, photos.get(0).getPhoto_reference());
-                        } else {
-                            Glide.with(imageView.getContext()).load(item.getIcon()).centerCrop().into(imageView);
-                        }
-                    }
-                };
-            }
-        };
+        adapter = new MyRecyclerViewAdapter((item, view, adapterPosition) -> Toast.makeText(this, item.getName(), Toast.LENGTH_SHORT).show());
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setHasFixedSize(true);
@@ -181,7 +154,9 @@ public class MapActivity extends RxAppCompatActivity implements OnMapReadyCallba
             @Override
             public void run() {
                 if (mLocation != null || count > 5) {
-                    searchPlaces(locationForSearch());
+                    LatLng location = locationForSearch();
+                    adapter.setBaseLocation(location);
+                    searchPlaces(location);
                 } else {
                     handler.postDelayed(this, 1000);
                 }

@@ -13,8 +13,12 @@ public class ImageUtils {
 
     public static final String PHOTO_URL = "https://maps.googleapis.com/maps/api/place/photo?photoreference=%s&key=%s&maxheight=100";
 
-    public static void loadImage(Context context, ImageView imageView, String photoreference) {
+    public static void loadGooglePhoto(Context context, ImageView imageView, String photoreference) {
         String url = String.format(PHOTO_URL, photoreference, context.getString(R.string.google_places_key));
+        loadIcon(context, url, imageView);
+    }
+
+    public static void loadIcon(Context context, String url, ImageView imageView) {
         Glide.with(context).load(url).centerCrop().into(imageView);
     }
 
