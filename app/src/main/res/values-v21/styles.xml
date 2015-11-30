@@ -1,0 +1,9 @@
+<resources>>
+
+    <style name="AppTheme.Map">
+        <item name="android:windowTranslucentStatus">true</item>
+        <!--<item name="android:statusBarColor">@color/transparent_gray_dark</item>-->
+        <!--<item name="android:statusBarColor">@android:color/transparent</item>-->
+    </style>
+
+</resources>
