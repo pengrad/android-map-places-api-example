@@ -33,13 +33,19 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical|end"
-                android:orientation="vertical">
+                android:layout_marginBottom="48dp"
+                android:orientation="vertical"
+                android:padding="8dp">
 
-                <Button
+
+                <ImageButton
                     android:id="@+id/button_location"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="my location"/>
+                    android:layout_gravity="end"
+                    android:background="@null"
+                    android:src="@drawable/btn_map_myposition"/>
+
 
                 <Button
                     android:id="@+id/button_loadMore"
@@ -52,19 +58,26 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical|start"
-                android:orientation="vertical">
+                android:layout_marginBottom="48dp"
+                android:orientation="vertical"
+                android:padding="8dp">
 
-                <Button
+                <ImageButton
                     android:id="@+id/button_plus"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="+"/>
+                    android:layout_gravity="end"
+                    android:layout_marginBottom="4dp"
+                    android:background="@null"
+                    android:src="@drawable/btn_map_zoomplus"/>
 
-                <Button
+                <ImageButton
                     android:id="@+id/button_minus"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="–"/>
+                    android:layout_gravity="end"
+                    android:background="@null"
+                    android:src="@drawable/btn_map_zoomminus"/>
             </LinearLayout>
         </FrameLayout>
 

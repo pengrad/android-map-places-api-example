@@ -7,7 +7,6 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.text.TextUtils;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -65,7 +64,6 @@ public class MapActivity extends RxAppCompatActivity implements OnMapReadyCallba
         initSlider();
 
         placeType = getIntent().getStringExtra(EXTRA_TYPE);
-        if (!TextUtils.isEmpty(placeType)) setTitle(placeType);
         googlePlaceAdapter = new GooglePlaceAdapter(this);
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
