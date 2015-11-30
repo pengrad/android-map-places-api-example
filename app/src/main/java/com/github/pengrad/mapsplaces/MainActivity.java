@@ -73,6 +73,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @OnClick(R.id.fab)
     void openMaps() {
         startActivity(new Intent(this, MapActivity.class));
+        AnimationUtils.animateTransition(this);
     }
 
     public void onCategorySelect(View view) {
@@ -107,5 +108,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 break;
         }
         startActivity(new Intent(this, MapActivity.class).putExtra(MapActivity.EXTRA_TYPE, type));
+        AnimationUtils.animateTransition(this);
     }
 }

@@ -7,6 +7,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -39,9 +40,9 @@ public class MapActivity extends RxAppCompatActivity implements OnMapReadyCallba
 
     public static final String EXTRA_TYPE = "TYPE";
 
-    public static final int DEFAULT_RADIUS = 5000;
+    public static final int DEFAULT_RADIUS = 1000;
     public static LatLng HANOI_LOCATION = new LatLng(21.0274259, 105.8222217);
-    public static float DEFAULT_ZOOM = 13;
+    public static float DEFAULT_ZOOM = 14;
 
     private GooglePlaceAdapter googlePlaceAdapter;
     private Location location;
@@ -96,9 +97,12 @@ public class MapActivity extends RxAppCompatActivity implements OnMapReadyCallba
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
-        map.setMyLocationEnabled(false);
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            finish();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -108,6 +112,18 @@ public class MapActivity extends RxAppCompatActivity implements OnMapReadyCallba
                 state == SlidingUpPanelLayout.PanelState.EXPANDED) {
             slidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
         } else super.onBackPressed();
+    }
+
+    @Override
+    public void finish() {
+        super.finish();
+        AnimationUtils.animateTransition(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        map.setMyLocationEnabled(false);
     }
 
     @Override
