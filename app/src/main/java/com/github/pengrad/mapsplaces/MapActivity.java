@@ -1,11 +1,13 @@
 package com.github.pengrad.mapsplaces;
 
+import android.graphics.Bitmap;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +15,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.request.target.SimpleTarget;
 import com.github.pengrad.recyclerview.RecyclerViewHolder;
 import com.github.pengrad.recyclerview.RecyclerViewListAdapter;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -20,7 +25,10 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import com.trello.rxlifecycle.ActivityEvent;
@@ -176,6 +184,16 @@ public class MapActivity extends RxAppCompatActivity implements OnMapReadyCallba
         mMap.setOnMyLocationChangeListener(null);
     }
 
+    @OnClick(R.id.button_plus)
+    void mapDoZoomPlus() {
+        mMap.animateCamera(CameraUpdateFactory.zoomIn());
+    }
+
+    @OnClick(R.id.button_minus)
+    void mapDoZoomMinus() {
+        mMap.animateCamera(CameraUpdateFactory.zoomOut());
+    }
+
     @OnClick(R.id.button_location)
     void onMyLocationButton() {
         Location location = mMap.getMyLocation();
@@ -204,8 +222,22 @@ public class MapActivity extends RxAppCompatActivity implements OnMapReadyCallba
                     for (Place place : places) {
                         io.github.axxiss.places.model.Location location = place.getGeometry().getLocation();
                         LatLng pos = new LatLng(location.getLat(), location.getLng());
-                        mMap.addMarker(new MarkerOptions().title(place.getName()).position(pos));
+                        Marker marker = mMap.addMarker(new MarkerOptions().title(place.getName()).position(pos));
+                        loadMarkerIcon(marker, place.getIcon());
                     }
                 });
+    }
+
+    private void loadMarkerIcon(final Marker marker, String iconUrl) {
+        if (TextUtils.isEmpty(iconUrl)) {
+            return;
+        }
+        Glide.with(this).load(iconUrl).asBitmap().centerCrop().into(new SimpleTarget<Bitmap>() {
+            @Override
+            public void onResourceReady(Bitmap bitmap, GlideAnimation<? super Bitmap> glideAnimation) {
+                BitmapDescriptor icon = BitmapDescriptorFactory.fromBitmap(bitmap);
+                marker.setIcon(icon);
+            }
+        });
     }
 }

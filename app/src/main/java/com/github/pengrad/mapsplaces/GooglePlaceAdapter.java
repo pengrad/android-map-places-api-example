@@ -70,7 +70,6 @@ public class GooglePlaceAdapter {
 
             @Override
             public void onException(Exception e) {
-//                nextPageToken = null;
                 Log.e("++++", e.getMessage(), e);
                 subscriber.onError(e);
             }
