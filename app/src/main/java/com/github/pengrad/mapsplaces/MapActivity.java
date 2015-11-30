@@ -3,11 +3,9 @@ package com.github.pengrad.mapsplaces;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,26 +23,20 @@ import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.trello.rxlifecycle.ActivityEvent;
+import com.trello.rxlifecycle.components.support.RxAppCompatActivity;
 
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import io.github.axxiss.places.PlacesSettings;
-import io.github.axxiss.places.Response;
-import io.github.axxiss.places.callback.PlacesCallback;
-import io.github.axxiss.places.enums.Params;
-import io.github.axxiss.places.enums.PlaceType;
-import io.github.axxiss.places.enums.Request;
 import io.github.axxiss.places.model.Place;
-import io.github.axxiss.places.request.NearbySearch;
-import io.github.axxiss.places.request.PlaceParams;
-import io.github.axxiss.places.request.PlacesClient;
+import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
 
-public class MapActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMyLocationChangeListener {
+public class MapActivity extends RxAppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMyLocationChangeListener {
 
+    public static final int DEFAULT_RADIUS = 1000;
     public static LatLng HANOI_LOCATION = new LatLng(21.0274259, 105.8222217);
     public static float DEFAULT_ZOOM = 14;
 
@@ -53,12 +45,16 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     private RecyclerViewListAdapter<Place> adapter;
     private Location mLocation;
 
+    private GooglePlaceAdapter googlePlaceAdapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
 
         ButterKnife.bind(this);
+
+        googlePlaceAdapter = new GooglePlaceAdapter(this);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -174,39 +170,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         return position;
     }
 
-    private void searchPlaces(LatLng latLng) {
-        PlacesSettings.getInstance().setApiKey(getString(R.string.google_places_key));
-
-        List<PlaceType> placeTypes = new ArrayList<>();
-        placeTypes.add(PlaceType.Cafe);
-
-        NearbySearch search = new NearbySearch(latLng.latitude, latLng.longitude, 1000);
-        search.setType(placeTypes);
-
-        PlaceParams params = new PlaceParams();
-        params.put(Params.Location, PlaceParams.buildLocation(latLng.latitude, latLng.longitude));
-        params.put(Params.Radius, 1000);
-        params.setTypes(new PlaceType[]{PlaceType.Cafe});
-
-        PlacesClient.sendRequest(Request.NearbySearch, params, new PlacesCallback() {
-            @Override
-            public void onSuccess(Response response) {
-                adapter.addAll(response.getResults());
-                for (Place place : response.getResults()) {
-                    Log.d("+++++", place.getName() + " " + place.getTypes());
-                    io.github.axxiss.places.model.Location location = place.getGeometry().getLocation();
-                    LatLng position = new LatLng(location.getLat(), location.getLng());
-                    mMap.addMarker(new MarkerOptions().title(place.getName()).position(position));
-                }
-            }
-
-            @Override
-            public void onException(Exception e) {
-                Log.e("++++", e.getMessage(), e);
-            }
-        });
-    }
-
     @Override
     public void onMyLocationChange(Location location) {
         mLocation = location;
@@ -224,6 +187,25 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
     @OnClick(R.id.button_loadMore)
     void loadMore() {
+        execute(googlePlaceAdapter.getNextPage());
+    }
 
+    private void searchPlaces(LatLng latLng) {
+        execute(googlePlaceAdapter.getAllPlaces(latLng, DEFAULT_RADIUS));
+    }
+
+    private void execute(Observable<Place[]> observable) {
+        observable.compose(bindUntilEvent(ActivityEvent.STOP))
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .onErrorReturn(e -> new Place[0])
+                .subscribe(places -> {
+                    adapter.addAll(places);
+                    for (Place place : places) {
+                        io.github.axxiss.places.model.Location location = place.getGeometry().getLocation();
+                        LatLng pos = new LatLng(location.getLat(), location.getLng());
+                        mMap.addMarker(new MarkerOptions().title(place.getName()).position(pos));
+                    }
+                });
     }
 }

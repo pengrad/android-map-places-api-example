@@ -35,6 +35,10 @@ dependencies {
 
     compile 'com.jakewharton:butterknife:7.0.1'
 
+    compile 'io.reactivex:rxjava:1.0.16'
+    compile 'io.reactivex:rxandroid:1.0.1'
+    compile 'com.trello:rxlifecycle:0.3.0'
+    compile 'com.trello:rxlifecycle-components:0.3.0'
 
     compile 'com.github.pengrad:recyclerview-utils:1.0.2'
 
