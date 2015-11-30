@@ -49,6 +49,7 @@ public class MapActivity extends RxAppCompatActivity implements OnMapReadyCallba
     private GoogleMap map;
     private MyRecyclerViewAdapter adapter;
     private String placeType;
+    private SliderListener sliderListener;
 
     @Bind(R.id.toolbar) Toolbar toolbar;
     @Bind(R.id.recycler_view) RecyclerView recyclerView;
@@ -91,9 +92,21 @@ public class MapActivity extends RxAppCompatActivity implements OnMapReadyCallba
         Toolbar slideToolbar = (Toolbar) findViewById(R.id.slide_toolbar);
         TextView slideTitle = (TextView) findViewById(R.id.slide_title);
         int titleColor = getResources().getColor(android.R.color.white);
-        SliderListener listener = new SliderListener(toolbar, slideToolbar, slideTitle, recyclerView, slidingUpPanelLayout, titleColor);
+        sliderListener = new SliderListener(toolbar, slideToolbar, slideTitle, recyclerView, slidingUpPanelLayout, titleColor);
         slidingUpPanelLayout.setDragView(slideTitle);
-        slidingUpPanelLayout.setPanelSlideListener(listener);
+        slidingUpPanelLayout.setPanelSlideListener(sliderListener);
+    }
+
+    //sync state
+    @Override
+    protected void onPostResume() {
+        super.onPostResume();
+        SlidingUpPanelLayout.PanelState state = slidingUpPanelLayout.getPanelState();
+        if (state == SlidingUpPanelLayout.PanelState.EXPANDED) {
+            sliderListener.onPanelExpanded(null);
+        } else if (state == SlidingUpPanelLayout.PanelState.ANCHORED) {
+            sliderListener.onPanelAnchored(null);
+        }
     }
 
     @Override
