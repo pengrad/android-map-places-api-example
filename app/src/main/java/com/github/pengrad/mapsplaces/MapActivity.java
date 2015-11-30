@@ -15,24 +15,28 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.androidmapsextensions.ClusteringSettings;
+import com.androidmapsextensions.GoogleMap;
+import com.androidmapsextensions.Marker;
+import com.androidmapsextensions.MarkerOptions;
+import com.androidmapsextensions.OnMapReadyCallback;
+import com.androidmapsextensions.SupportMapFragment;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.github.pengrad.recyclerview.RecyclerViewHolder;
 import com.github.pengrad.recyclerview.RecyclerViewListAdapter;
 import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import com.trello.rxlifecycle.ActivityEvent;
 import com.trello.rxlifecycle.components.support.RxAppCompatActivity;
+
+import java.util.List;
 
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -42,7 +46,7 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
 
-public class MapActivity extends RxAppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMyLocationChangeListener {
+public class MapActivity extends RxAppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMyLocationChangeListener, GoogleMap.OnMarkerClickListener {
 
     public static final int DEFAULT_RADIUS = 1000;
     public static LatLng HANOI_LOCATION = new LatLng(21.0274259, 105.8222217);
@@ -70,7 +74,7 @@ public class MapActivity extends RxAppCompatActivity implements OnMapReadyCallba
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
+        mapFragment.getExtendedMapAsync(this);
 
         adapter = new RecyclerViewListAdapter<Place>((item, view, adapterPosition) -> {
             Toast.makeText(this, item.getName(), Toast.LENGTH_SHORT).show();
@@ -138,9 +142,12 @@ public class MapActivity extends RxAppCompatActivity implements OnMapReadyCallba
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        mMap.setClustering(new ClusteringSettings().clusterOptionsProvider(new ClusterIconProvider(getResources())).addMarkersDynamically(true));
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(HANOI_LOCATION, DEFAULT_ZOOM));
         mMap.setOnMyLocationChangeListener(this);
         mMap.setMyLocationEnabled(true);
+        mMap.setOnMarkerClickListener(this);
+
         UiSettings mapUI = mMap.getUiSettings();
         mapUI.setMapToolbarEnabled(false);
         mapUI.setMyLocationButtonEnabled(false);
@@ -239,5 +246,24 @@ public class MapActivity extends RxAppCompatActivity implements OnMapReadyCallba
                 marker.setIcon(icon);
             }
         });
+    }
+
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        if (marker == null) {
+            // shit happens (Note 2, android 4.1)
+            return false;
+        }
+        if (marker.isCluster()) {
+            List<Marker> markers = marker.getMarkers();
+            LatLngBounds.Builder builder = LatLngBounds.builder();
+            for (Marker m : markers) {
+                builder.include(m.getPosition());
+            }
+            LatLngBounds bounds = builder.build();
+            mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 50));
+            return true;
+        }
+        return false;
     }
 }
