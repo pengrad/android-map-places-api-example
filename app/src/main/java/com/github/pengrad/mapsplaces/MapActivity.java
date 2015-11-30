@@ -1,16 +1,13 @@
 package com.github.pengrad.mapsplaces;
 
-import android.graphics.Bitmap;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -20,13 +17,8 @@ import com.androidmapsextensions.Marker;
 import com.androidmapsextensions.MarkerOptions;
 import com.androidmapsextensions.OnMapReadyCallback;
 import com.androidmapsextensions.SupportMapFragment;
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.animation.GlideAnimation;
-import com.bumptech.glide.request.target.SimpleTarget;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.UiSettings;
-import com.google.android.gms.maps.model.BitmapDescriptor;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
@@ -35,6 +27,7 @@ import com.trello.rxlifecycle.components.support.RxAppCompatActivity;
 
 import java.util.List;
 
+import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import io.github.axxiss.places.model.Place;
@@ -51,14 +44,14 @@ public class MapActivity extends RxAppCompatActivity implements OnMapReadyCallba
     public static LatLng HANOI_LOCATION = new LatLng(21.0274259, 105.8222217);
     public static float DEFAULT_ZOOM = 14;
 
-    private GoogleMap mMap;
-
-    private MyRecyclerViewAdapter adapter;
-    private Location mLocation;
-
-
     private GooglePlaceAdapter googlePlaceAdapter;
-    private String mPlaceType;
+    private Location location;
+    private GoogleMap map;
+    private MyRecyclerViewAdapter adapter;
+    private String placeType;
+
+    @Bind(R.id.toolbar) Toolbar toolbar;
+    @Bind(R.id.recycler_view) RecyclerView recyclerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,78 +60,60 @@ public class MapActivity extends RxAppCompatActivity implements OnMapReadyCallba
 
         ButterKnife.bind(this);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        initToolbar();
+        initListView();
+        initSlider();
 
-        mPlaceType = getIntent().getStringExtra(EXTRA_TYPE);
+        placeType = getIntent().getStringExtra(EXTRA_TYPE);
+        if (!TextUtils.isEmpty(placeType)) setTitle(placeType);
         googlePlaceAdapter = new GooglePlaceAdapter(this);
-
-        if (!TextUtils.isEmpty(mPlaceType)) setTitle(mPlaceType);
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getExtendedMapAsync(this);
+    }
 
+    private void initToolbar() {
+        setSupportActionBar(toolbar);
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) actionBar.setDisplayHomeAsUpEnabled(true);
+    }
+
+    private void initListView() {
         adapter = new MyRecyclerViewAdapter((item, view, adapterPosition) -> Toast.makeText(this, item.getName(), Toast.LENGTH_SHORT).show());
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setHasFixedSize(true);
         recyclerView.setAdapter(adapter);
+    }
 
+    private void initSlider() {
         Toolbar slideToolbar = (Toolbar) findViewById(R.id.slide_toolbar);
-        TextView sliteTitle = (TextView) findViewById(R.id.slide_title);
+        TextView slideTitle = (TextView) findViewById(R.id.slide_title);
         SlidingUpPanelLayout slidingUpPanelLayout = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);
-        slidingUpPanelLayout.setDragView(sliteTitle);
-        slidingUpPanelLayout.setPanelSlideListener(new SlidingUpPanelLayout.SimplePanelSlideListener() {
-            @Override
-            public void onPanelExpanded(View panel) {
-                toolbar.setVisibility(View.INVISIBLE);
-                sliteTitle.setVisibility(View.GONE);
-                slideToolbar.setVisibility(View.VISIBLE);
-                slideToolbar.setTitle("Results");
-                slideToolbar.setTitleTextColor(getResources().getColor(android.R.color.white));
 
-//                slideToolbar.setTitleTextColor(getColor(android.R.color.white));
-                slideToolbar.setNavigationIcon(R.drawable.ic_arrow_back_white_24dp);
-                slideToolbar.setNavigationOnClickListener(v -> slidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED));
-                recyclerView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-            }
-
-            @Override
-            public void onPanelCollapsed(View panel) {
-                toolbar.setVisibility(View.VISIBLE);
-                slideToolbar.setVisibility(View.GONE);
-                sliteTitle.setVisibility(View.VISIBLE);
-            }
-
-            @Override
-            public void onPanelAnchored(View panel) {
-                toolbar.setVisibility(View.VISIBLE);
-                slideToolbar.setVisibility(View.GONE);
-                sliteTitle.setVisibility(View.VISIBLE);
-                int height = slidingUpPanelLayout.getHeight() / 2 - slidingUpPanelLayout.getPanelHeight() / 2;
-                recyclerView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height));
-            }
-        });
+        int titleColor = getResources().getColor(android.R.color.white);
+        SliderListener listener = new SliderListener(toolbar, slideToolbar, slideTitle, recyclerView, slidingUpPanelLayout, titleColor);
+        slidingUpPanelLayout.setDragView(slideTitle);
+        slidingUpPanelLayout.setPanelSlideListener(listener);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        mMap.setMyLocationEnabled(false);
+        map.setMyLocationEnabled(false);
     }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
-        mMap.setClustering(new ClusteringSettings().clusterOptionsProvider(new ClusterIconProvider(getResources())).addMarkersDynamically(true));
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(HANOI_LOCATION, DEFAULT_ZOOM));
-        mMap.setOnMyLocationChangeListener(this);
-        mMap.setMyLocationEnabled(true);
-        mMap.setOnMarkerClickListener(this);
+        map = googleMap;
+        map.setClustering(new ClusteringSettings().clusterOptionsProvider(new ClusterIconProvider(getResources())).addMarkersDynamically(true));
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(HANOI_LOCATION, DEFAULT_ZOOM));
+        map.setOnMyLocationChangeListener(this);
+        map.setMyLocationEnabled(true);
+        map.setOnMarkerClickListener(this);
 
-        UiSettings mapUI = mMap.getUiSettings();
+        UiSettings mapUI = map.getUiSettings();
         mapUI.setMapToolbarEnabled(false);
         mapUI.setMyLocationButtonEnabled(false);
 
@@ -153,7 +128,7 @@ public class MapActivity extends RxAppCompatActivity implements OnMapReadyCallba
 
             @Override
             public void run() {
-                if (mLocation != null || count > 5) {
+                if (location != null || count > 5) {
                     LatLng location = locationForSearch();
                     adapter.setBaseLocation(location);
                     searchPlaces(location);
@@ -168,7 +143,7 @@ public class MapActivity extends RxAppCompatActivity implements OnMapReadyCallba
 
     private LatLng locationForSearch() {
         LatLng position = HANOI_LOCATION;
-        Location location = mLocation != null ? mLocation : mMap.getMyLocation();
+        Location location = this.location != null ? this.location : map.getMyLocation();
         if (location == null) {
             Toast.makeText(this, "Can't get location, use default - Hanoi", Toast.LENGTH_SHORT).show();
         } else {
@@ -179,26 +154,26 @@ public class MapActivity extends RxAppCompatActivity implements OnMapReadyCallba
 
     @Override
     public void onMyLocationChange(Location location) {
-        mLocation = location;
-        mMap.setOnMyLocationChangeListener(null);
+        this.location = location;
+        map.setOnMyLocationChangeListener(null);
     }
 
     @OnClick(R.id.button_plus)
     void mapDoZoomPlus() {
-        mMap.animateCamera(CameraUpdateFactory.zoomIn());
+        map.animateCamera(CameraUpdateFactory.zoomIn());
     }
 
     @OnClick(R.id.button_minus)
     void mapDoZoomMinus() {
-        mMap.animateCamera(CameraUpdateFactory.zoomOut());
+        map.animateCamera(CameraUpdateFactory.zoomOut());
     }
 
     @OnClick(R.id.button_location)
     void onMyLocationButton() {
-        Location location = mMap.getMyLocation();
+        Location location = map.getMyLocation();
         if (location != null) {
             LatLng l = new LatLng(location.getLatitude(), location.getLongitude());
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(l, mMap.getCameraPosition().zoom));
+            map.animateCamera(CameraUpdateFactory.newLatLngZoom(l, map.getCameraPosition().zoom));
         }
     }
 
@@ -208,7 +183,7 @@ public class MapActivity extends RxAppCompatActivity implements OnMapReadyCallba
     }
 
     private void searchPlaces(LatLng latLng) {
-        execute(googlePlaceAdapter.getPlacesByType(latLng, DEFAULT_RADIUS, mPlaceType));
+        execute(googlePlaceAdapter.getPlacesByType(latLng, DEFAULT_RADIUS, placeType));
     }
 
     private void execute(Observable<Place[]> observable) {
@@ -221,23 +196,10 @@ public class MapActivity extends RxAppCompatActivity implements OnMapReadyCallba
                     for (Place place : places) {
                         io.github.axxiss.places.model.Location location = place.getGeometry().getLocation();
                         LatLng pos = new LatLng(location.getLat(), location.getLng());
-                        Marker marker = mMap.addMarker(new MarkerOptions().title(place.getName()).position(pos));
-                        loadMarkerIcon(marker, place.getIcon());
+                        Marker marker = map.addMarker(new MarkerOptions().title(place.getName()).position(pos));
+                        ImageUtils.loadMarkerIcon(this, marker, place.getIcon());
                     }
                 });
-    }
-
-    private void loadMarkerIcon(final Marker marker, String iconUrl) {
-        if (TextUtils.isEmpty(iconUrl)) {
-            return;
-        }
-        Glide.with(this).load(iconUrl).asBitmap().centerCrop().into(new SimpleTarget<Bitmap>() {
-            @Override
-            public void onResourceReady(Bitmap bitmap, GlideAnimation<? super Bitmap> glideAnimation) {
-                BitmapDescriptor icon = BitmapDescriptorFactory.fromBitmap(bitmap);
-                marker.setIcon(icon);
-            }
-        });
     }
 
     @Override
@@ -253,7 +215,7 @@ public class MapActivity extends RxAppCompatActivity implements OnMapReadyCallba
                 builder.include(m.getPosition());
             }
             LatLngBounds bounds = builder.build();
-            mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 50));
+            map.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 50));
             return true;
         }
         return false;
