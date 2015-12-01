@@ -67,7 +67,7 @@ public class MapActivity extends RxAppCompatActivity implements OnMapReadyCallba
         initSlider();
 
         placeType = getIntent().getStringExtra(EXTRA_TYPE);
-        googlePlaceAdapter = new GooglePlaceAdapter(this);
+        googlePlaceAdapter = new GooglePlaceAdapter();
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);

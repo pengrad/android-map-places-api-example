@@ -1,6 +1,5 @@
 package com.github.pengrad.mapsplaces;
 
-import android.content.Context;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
@@ -26,8 +25,8 @@ public class GooglePlaceAdapter {
 
     private String nextPageToken;
 
-    public GooglePlaceAdapter(Context context) {
-        PlacesSettings.getInstance().setApiKey(context.getString(R.string.google_places_key));
+    public GooglePlaceAdapter() {
+        PlacesSettings.getInstance().setApiKey(BuildConfig.GOOGLE_PLACES_API_KEY);
     }
 
     public Observable<Place[]> getPlacesByType(LatLng latLng, int radius, @Nullable String placeType) {
